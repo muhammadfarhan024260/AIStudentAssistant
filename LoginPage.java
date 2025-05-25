@@ -43,11 +43,19 @@ public class LoginPage {
 
     private RoundedButton signInButton;
 
-    private String placeholder = "Enter your email";
+    private String placeholder = "Enter your email / username";
     private String placeholder2 = "Password";
+    
+    private boolean validEmail_Username = false;
+//    private boolean validUsername = false;
+    private boolean validPassword = false;
 
-    public LoginPage() {
+    private Runnable onload;
+    
+    public LoginPage(Runnable onload) {
 
+        this.onload = onload;
+        
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width;
         int height = screenSize.height;
@@ -80,13 +88,11 @@ public class LoginPage {
         emailLabelPanel.setLayout(new BorderLayout());
         emailLabelPanel.setOpaque(false);
         emailLabelPanel.setMaximumSize(new Dimension(320, 20));
-        emailLabelPanel.setBackground(Color.red);
 
         emailLabel = new JLabel("Email");
         emailLabel.setFont(new Font("Roboto", Font.BOLD, 12));
         emailLabel.setForeground(Color.LIGHT_GRAY);
         emailLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0)); // small left padding
-        
 
         emailLabelPanel.add(emailLabel, BorderLayout.WEST);
         innerPanel.add(emailLabelPanel);
@@ -137,7 +143,7 @@ public class LoginPage {
         emailValidLabelPanel.setOpaque(false);
         emailValidLabelPanel.setMaximumSize(new Dimension(320, 20));
 
-        emailValidLabel = new JLabel("Please enter a valid email address");
+        emailValidLabel = new JLabel("Please enter a valid email address or Username");
         emailValidLabel.setFont(new Font("Roboto", Font.BOLD, 12));
         emailValidLabel.setForeground(new Color(151, 0, 0));
         emailValidLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0)); // small left padding
@@ -150,13 +156,16 @@ public class LoginPage {
         emailSpacer.setVisible(false);
         innerPanel.add(emailSpacer);
 
+        
+
         emailField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 String text = emailField.getText();
-                if (isValidEmail(text) || text.equals(placeholder)) {
+                if (UserDataHandler.isValidEmail(text) || UserDataHandler.validateUsername(text) || text.equals(placeholder)) {
                     emailValidLabel.setVisible(false);
                     emailSpacer.setVisible(false);
+                    validEmail_Username = true;
                 } else {
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
@@ -195,6 +204,24 @@ public class LoginPage {
         passField.setAlignmentX(Component.CENTER_ALIGNMENT);
         passField.setText(placeholder2);
         passField.setForeground(Color.GRAY);
+        
+        passField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String password = passField.getText();
+                String text = emailField.getText();
+                if (UserDataHandler.validatePassword(text , password) || password.equals(placeholder)) {
+                    passLabel.setVisible(false);
+                    emailSpacer.setVisible(false);
+                    validPassword = true;
+                } else {
+                    emailValidLabel.setVisible(true);
+                    emailSpacer.setVisible(true);
+                }
+            }
+        });
+        
+        
         passField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -233,6 +260,18 @@ public class LoginPage {
             public void mouseExited(MouseEvent e) {
                 signInButton.setBackground(new Color(99, 102, 241));
             }
+        });
+        
+        //------------------LoginPageButton Verification Button ----------------------
+        
+        signInButton.addActionListener (e ->{
+            if(validEmail_Username && validPassword){
+                if(onload != null){
+                onload.run();
+            }
+            }
+            
+            
         });
 
         innerPanel.add(Box.createVerticalStrut(20));
