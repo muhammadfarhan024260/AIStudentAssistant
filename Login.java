@@ -73,7 +73,6 @@ public class Login extends javax.swing.JFrame {
         pageWrapper.add((new DashboardPage()).getMainPanel(), BorderLayout.CENTER);
         pageWrapper.revalidate();
         pageWrapper.repaint();
-//        this.setContentPane(new DashboardPage().getMainPanel());
         
         this.revalidate();
         this.repaint();
@@ -107,7 +106,6 @@ public class Login extends javax.swing.JFrame {
 
     private void showEmailPage() {
         EmailVerificationPage emailverification = new EmailVerificationPage(() -> {
-            // This will be called ONLY if everything is valid
             SwingUtilities.invokeLater(() -> showLoginPage());
         });
         this.setContentPane(emailverification.getMainPanel());
