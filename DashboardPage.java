@@ -110,15 +110,7 @@ public class DashboardPage {
         rightPanel.add(rightUpper, BorderLayout.NORTH);
 
         setupChatArea(rightPanel);
-
-//        addUserMessage("user, how are you?");
-//        addBotMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac suscipit elit. Aenean dolor sapien, posuere id dictum id, ultricies a mi. Vivamus vehicula posuere sodales. Aenean cursus tincidunt neque at sollicitudin. Suspendisse venenatis nec neque ac volutpat. Integer vel purus cursus, gravida eros id, bibendum diam. Aliquam auctor, urna in scelerisque gravida, purus leo consequat neque, finibus dictum enim orci vel neque. Nunc eu lorem tortor. Fusce eget commodo orci, dictum luctus nisi. Cras tellus arcu, tincidunt in tristique et, sagittis vel enim. Aenean sollicitudin ligula eu lectus blandit, non luctus lacus semper. Lorem ipsum dolor sit amet, consectetur.");
-//        addUserMessage("Hello, how are you?");
-//        addBotMessage("I'm great, thank you! How can I help you today?");
-//        addUserMessage("Hello, how are you?");
-//        addBotMessage("I'm great, thank you! How can I help you today?");
-//        addUserMessage("Hello, how are you?");
-//        addBotMessage("I'm great, thank you! How can I help you today?");
+        
         bgPanel.add(leftPanel, BorderLayout.WEST);
         bgPanel.add(rightPanel, BorderLayout.EAST);
         rightPanel.add(chatInputPanel, BorderLayout.SOUTH);
