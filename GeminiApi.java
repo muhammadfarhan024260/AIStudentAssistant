@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 public class GeminiApi {
 
-    private static final String API_KEY = "AIzaSyC4YRMrFh9o21QHOmJ1fQlF1EKLiQ2Prq0"; // Replace with your API key
+    private static final String API_KEY = "My Api :)"; 
     private static final String API_URL =
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
 
