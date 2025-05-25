@@ -111,4 +111,17 @@ public class UserDataHandler {
     }
 }
 
+    // public static void deleteAllUsers() {
+//    List<User> emptyList = new ArrayList<>();
+//    try {
+//        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME));
+//        out.writeObject(emptyList);
+//        out.close();
+//        System.out.println("All users have been deleted.");
+//    } catch (IOException e) {
+//        System.out.println("Error while deleting: " + e.getMessage());
+//    }
+//}
+
+    
 }
