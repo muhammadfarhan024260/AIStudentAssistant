@@ -51,9 +51,14 @@ public class EmailVerificationPage {
 
     private String placeholder = "Enter 6-digit code";
     private String placeholder2 = "Password";
+    
+    private Runnable onSuccessCallback;
+    private boolean OtpMatched = false;
 
-    public EmailVerificationPage() {
+    public EmailVerificationPage(Runnable onSuccessCallback ) {
 
+        this.onSuccessCallback = onSuccessCallback;
+        
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width;
         int height = screenSize.height;
@@ -176,6 +181,7 @@ public class EmailVerificationPage {
                     emailValidLabel.setText("Correct OTP");
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
+                    OtpMatched = true;
                 } else {
                     emailField.setBorder(new RoundedBorder(new Color(200, 0, 0), 10));
                     emailValidLabel.setForeground(new Color(200, 0, 0));
@@ -185,7 +191,8 @@ public class EmailVerificationPage {
                 }
             }
         });
-
+        
+        
         emailField.addFocusListener(new FocusAdapter() {
 
             @Override
@@ -246,6 +253,16 @@ public class EmailVerificationPage {
                 signInButton.setBackground(new Color(99, 102, 241));
             }
         });
+        
+        //------------------Email Verification Button ----------------------
+        
+        signInButton.addActionListener (e ->{
+            if(OtpMatched){
+                if(onSuccessCallback != null){
+                    onSuccessCallback.run();
+                }
+            }
+        });
 
 //        innerPanel.add(Box.createVerticalStrut(20));
         innerPanel.add(signInButton);
@@ -273,5 +290,5 @@ public class EmailVerificationPage {
     public RoundedButton getSignInButton() {
         return signInButton;
     }
-
+    
 }
