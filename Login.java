@@ -106,11 +106,11 @@ public class Login extends javax.swing.JFrame {
     }
 
     private void showEmailPage() {
-        EmailVerificationPage emailPage = new EmailVerificationPage();
-        pageWrapper.removeAll();
-        pageWrapper.add(emailPage.getMainPanel(), BorderLayout.CENTER);
-        pageWrapper.revalidate();
-        pageWrapper.repaint();
+        EmailVerificationPage emailverification = new EmailVerificationPage(() -> {
+            // This will be called ONLY if everything is valid
+            SwingUtilities.invokeLater(() -> showLoginPage());
+        });
+        this.setContentPane(emailverification.getMainPanel());
         this.revalidate();
         this.repaint();
     }
