@@ -254,11 +254,13 @@ public class EmailVerificationPage {
             }
         });
         
-        //------------------Email Verification Button ----------------------
-        
-        signInButton.addActionListener (e ->{
-            if(OtpMatched){
-                if(onSuccessCallback != null){
+        signInButton.addActionListener(e -> {
+            if (OtpMatched) {
+                if (userNotAdded){
+                    UserDataHandler.addUser(SignupPage.getUser());
+                    userNotAdded = false;
+                }
+                if (onSuccessCallback != null) {
                     onSuccessCallback.run();
                 }
             }
