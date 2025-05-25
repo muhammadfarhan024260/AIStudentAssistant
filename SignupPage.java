@@ -75,10 +75,10 @@ public class SignupPage {
     private String placeholder3 = "Enter your name";
     private static String recieverEmail = "default@mail.com";
 
-    boolean isUsernameFieldSpaced = false;
-    boolean isEmailFieldSpaced = false;
-    boolean isPassFieldSpaced = false;
-    boolean isConfirmPassFieldSpaced = false;
+    private boolean isUsernameFieldSpaced = false;
+    private boolean isEmailFieldSpaced = false;
+    private boolean isPassFieldSpaced = false;
+    private boolean isConfirmPassFieldSpaced = false;
 
     private int length = 550;
 
@@ -90,6 +90,8 @@ public class SignupPage {
     public static boolean canProceedVar = false;
 
     private Runnable onSuccessCallback;
+    
+    private static User user;
 
     public SignupPage(Runnable onSuccessCallback) {
         this.onSuccessCallback = onSuccessCallback;
@@ -581,18 +583,25 @@ public class SignupPage {
 
         innerPanel.add(signupSpacer);
         innerPanel.add(signUpButton);
-        
-        
-//------------------------------------SignUP Buttonn--------------------
-
 
         signUpButton.addActionListener(e -> {
-            
-            
-            
 
             if (usernameField.getText().isEmpty() || usernameField.getText().equals(placeholder3)) {
                 usernameField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
+                usernameValidLabel.setVisible(true);
+                usernameSpacer.setVisible(true);
+
+                if (!isUsernameFieldSpaced) {
+                    length += 10;
+                    isUsernameFieldSpaced = true;
+                }
+
+                if (canProceed[0]) {
+                    canProceed[0] = false;
+                }
+            } else if (UserDataHandler.isValidUsername(usernameField.getText())) {
+                usernameField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
+                usernameValidLabel.setText("This username is already registered");
                 usernameValidLabel.setVisible(true);
                 usernameSpacer.setVisible(true);
 
@@ -635,8 +644,20 @@ public class SignupPage {
                 if (canProceed[1]) {
                     canProceed[1] = false;
                 }
-            } else {
+            } else if ((UserDataHandler.isValidEmail(emailField.getText()))) {
+                emailValidLabel.setText("This email address is already registered");
+                emailField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
+                emailValidLabel.setVisible(true);
+                emailSpacer.setVisible(true);
 
+                if (!isEmailFieldSpaced) {
+                    length += 10;
+                    isEmailFieldSpaced = true;
+                }
+
+                if (canProceed[1]) {
+                    canProceed[1] = false;
+                }
             }
 
             if (passField.getText().isEmpty() || passField.getText().equals(placeholder2)) {
@@ -716,36 +737,39 @@ public class SignupPage {
             if (canProceedVar) {
 
                 recieverEmail = emailField.getText();
-
-                //                System.out.println("Email sending");
                 String email = emailField.getText();
                 String username = usernameField.getText();
                 String password = passField.getText();
-                
+
                 generatedOTP = EmailSender.generateOTP();
                 String subject = "Your Verification Code";
                 String body = "Your OTP is: " + generatedOTP;
 
                 try {
                     EmailSender.sendEmail(username, email, subject, body);
-                    User user = new User(username, email, password);     //User class to add new user in DataBase
-                    UserDataHandler.addUser(user);
-                    System.out.println("New User Added !");
-//                    JOptionPane.showMessageDialog(null, "OTP sent to " + email);
+                    user = new User(username, email, password);
                     if (onSuccessCallback != null) {
                         onSuccessCallback.run();
                     }
                 } catch (MessagingException ex) {
-//                    JOptionPane.showMessageDialog(null, "Failed to send OTP. Check your network or email setup.");
-//                    ex.printStackTrace();
+                    emailValidLabel.setText("Failed to send OTP. Check your network or email setup.");
+                    emailField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
+                    emailValidLabel.setVisible(true);
+                    emailSpacer.setVisible(true);
+
+                    if (!isEmailFieldSpaced) {
+                        length += 10;
+                        isEmailFieldSpaced = true;
+                    }
                 } catch (UnsupportedEncodingException ex) {
-//                    Logger.getLogger(SignupPage.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    System.out.println(ex);
                 }
 
                 canDisposeSignupPage = true;
 
             } else {
-//                System.out.println("Can not Proceed");
+                
             }
 
             innerPanel.setPreferredSize(new Dimension(400, length));
@@ -786,7 +810,6 @@ public class SignupPage {
     private void updatePasswordStrength() {
         String password = passField.getText().trim();
 
-        // If password is empty or still the placeholder, skip evaluation
         if (password.isEmpty() || password.equals(placeholder2)) {
             passwordStrengthBar.setValue(0);
             passwordStrengthResultLabel.setText("");
@@ -885,4 +908,7 @@ public class SignupPage {
         return generatedOTP;
     }
 
+    public static User getUser(){
+        return user;
+    }
 }
