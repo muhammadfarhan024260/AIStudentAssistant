@@ -1,6 +1,11 @@
 package bukc.project;
 
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -11,6 +16,11 @@ public class DashboardPage {
     private JPanel chatPanel;
 
     private int leftPanelWidth = 150;
+
+    private boolean proceedQuestions = false;
+
+    private String placeholder = "What would you like to know? Ask a question...";
+    private String question = null;
 
     public DashboardPage() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -48,7 +58,7 @@ public class DashboardPage {
         chatInputPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
         // Input field
-        JTextField chatInputField = new JTextField("What would you like to know? Ask a question...");
+        JTextField chatInputField = new JTextField(placeholder);
         chatInputField.setFont(new Font("Roboto", Font.PLAIN, 14));
         chatInputField.setForeground(Color.GRAY);
         chatInputField.setBackground(new Color(32, 41, 56));
@@ -59,10 +69,19 @@ public class DashboardPage {
         ));
         chatInputField.setPreferredSize(new Dimension(width - 150, 40));
 
+        // Send Button
+        JButton sendButton = new JButton("Proceed");
+        sendButton.setBackground(new Color(99, 102, 241));
+        sendButton.setForeground(Color.WHITE);
+        sendButton.setFocusPainted(false);
+        sendButton.setBorderPainted(false);
+        sendButton.setFont(new Font("Roboto", Font.BOLD, 14));
+        sendButton.setPreferredSize(new Dimension(100, 40));
+
         // Clear placeholder on focus
         chatInputField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent e) {
-                if (chatInputField.getText().equals("What would you like to know? Ask a question...")) {
+                if (chatInputField.getText().equals(placeholder)) {
                     chatInputField.setText("");
                     chatInputField.setForeground(Color.WHITE);
                 }
@@ -70,36 +89,62 @@ public class DashboardPage {
 
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (chatInputField.getText().isEmpty()) {
-                    chatInputField.setText("What would you like to know? Ask a question...");
+                    chatInputField.setText(placeholder);
                     chatInputField.setForeground(Color.GRAY);
                 }
             }
         });
 
-        // Send Button
-        JButton sendButton = new JButton("Ask");
-        sendButton.setBackground(new Color(99, 102, 241));
-        sendButton.setForeground(Color.WHITE);
-        sendButton.setFocusPainted(false);
-        sendButton.setFont(new Font("Roboto", Font.BOLD, 14));
-        sendButton.setPreferredSize(new Dimension(80, 40));
+        chatInputField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (chatInputField.getText().isEmpty() || chatInputField.getText().equals(placeholder)) {
+
+                } else {
+                    sendButton.setText("Ask");
+                    if (proceedQuestions) {
+                        proceedQuestions = false;
+                    }
+                }
+            }
+        });
+
+        sendButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                sendButton.setBackground(new Color(79, 70, 229)); // darker indigo
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                sendButton.setBackground(new Color(99, 102, 241));
+            }
+        });
 
         sendButton.addActionListener(e -> {
-            String question = chatInputField.getText().trim();
 
-            if (chatInputField.getText().isEmpty() || chatInputField.getText().equals("What would you like to know? Ask a question...")) {
-                addUserMessage("Empty");
-                addBotMessage("I'm great, thank you! How can I help you today?");
-                chatInputField.setText("What would you like to know? Ask a question...");
-                chatInputField.setForeground(Color.GRAY);
-            } else {
+            if (!proceedQuestions && !(chatInputField.getText().equals(placeholder))) {
 
-                String responce = GeminiApi.getResponse(question);
+                java.util.List<String> questions = new ArrayList<>();
+                questions.add(chatInputField.getText().trim());
 
+                for (String q : questions) {
+                    question = question + "\n" + q;
+                }
+//                System.out.println("121");
                 addUserMessage(chatInputField.getText());
-                addBotMessage(responce);
-                chatInputField.setText("What would you like to know? Ask a question...");
+                chatInputField.setText(placeholder);
                 chatInputField.setForeground(Color.GRAY);
+                sendButton.setText("Proceed");
+                proceedQuestions = true;
+
+            } else if (question != null) {
+                String response = GeminiApi.getResponse(question);
+//                System.out.println("Response = " + response);
+//                System.out.println("Question = " + question);
+                addBotMessage(response);
+                question = null;
+//                addUserMessage(question);
             }
 
         });
