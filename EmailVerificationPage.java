@@ -51,14 +51,15 @@ public class EmailVerificationPage {
 
     private String placeholder = "Enter 6-digit code";
     private String placeholder2 = "Password";
-    
+
     private Runnable onSuccessCallback;
     private boolean OtpMatched = false;
+    private boolean userNotAdded = true;
 
-    public EmailVerificationPage(Runnable onSuccessCallback ) {
+    public EmailVerificationPage(Runnable onSuccessCallback) {
 
         this.onSuccessCallback = onSuccessCallback;
-        
+
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width;
         int height = screenSize.height;
@@ -123,10 +124,6 @@ public class EmailVerificationPage {
         emailField.setForeground(Color.WHITE);
         emailField.setCaretColor(Color.GRAY);
         emailField.setBorder(new RoundedBorder(new Color(50, 60, 80), 10));
-//        emailField.setBorder(BorderFactory.createCompoundBorder(
-//                BorderFactory.createLineBorder(new Color(50, 60, 80)),
-//                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-//        ));
         emailField.setAlignmentX(Component.CENTER_ALIGNMENT);
         emailField.setText(placeholder);
         emailField.setForeground(Color.GRAY);
@@ -166,9 +163,6 @@ public class EmailVerificationPage {
         emailValidLabel.setVisible(false);
 
         emailValidLabelPanel.add(emailValidLabel, BorderLayout.WEST);
-//        emailValidLabelPanel.setVisible(true);
-//        emailValidLabelPanel.setBackground(Color.RED);
-//        emailValidLabelPanel.setOpaque(true);
         innerPanel.add(emailValidLabelPanel);
 
         emailField.addKeyListener(new KeyAdapter() {
@@ -191,8 +185,7 @@ public class EmailVerificationPage {
                 }
             }
         });
-        
-        
+
         emailField.addFocusListener(new FocusAdapter() {
 
             @Override
@@ -226,8 +219,6 @@ public class EmailVerificationPage {
         resendLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0)); // small left padding
 
         resendLabelPanel.add(resendLabel, BorderLayout.WEST);
-//        resendLabelPanel.setOpaque(true);
-//        resendLabelPanel.setBackground(Color.YELLOW);
         innerPanel.add(resendLabelPanel);
         innerPanel.add(Box.createVerticalStrut(5));
 
@@ -253,7 +244,7 @@ public class EmailVerificationPage {
                 signInButton.setBackground(new Color(99, 102, 241));
             }
         });
-        
+
         signInButton.addActionListener(e -> {
             if (OtpMatched) {
                 if (userNotAdded){
@@ -266,7 +257,6 @@ public class EmailVerificationPage {
             }
         });
 
-//        innerPanel.add(Box.createVerticalStrut(20));
         innerPanel.add(signInButton);
 
         bgPanel.setBounds(0, 0, width, height);
@@ -292,5 +282,5 @@ public class EmailVerificationPage {
     public RoundedButton getSignInButton() {
         return signInButton;
     }
-    
+
 }
