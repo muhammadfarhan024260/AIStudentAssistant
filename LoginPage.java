@@ -57,6 +57,10 @@ public class LoginPage {
     private Runnable forgetPassword;
     private Runnable dashboardPage;
 
+    public LoginPage() {
+
+    }
+
     public LoginPage(Runnable forgetPassword, Runnable dashboardPage) {
 
         this.forgetPassword = forgetPassword;
@@ -414,6 +418,13 @@ public class LoginPage {
             }
 
             if (showDashboardPage) {
+                if (isValidEmail(emailField.getText())) {
+                    UserSession.loggedInEmail = emailField.getText();
+                    UserSession.loggedInUsername = UserDataHandler.getUsernameByEmail(emailField.getText());
+                } else {
+                    UserSession.loggedInUsername= emailField.getText();
+                    UserSession.loggedInEmail = UserDataHandler.getEmailByUsername(emailField.getText());
+                }
                 if (dashboardPage != null) {
                     dashboardPage.run();
                 }
