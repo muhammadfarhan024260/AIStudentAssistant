@@ -8,19 +8,28 @@ import org.json.JSONObject;
 
 public class GeminiApi {
 
-    private static final String API_KEY = "My API :)"; // Replace with your API key
+    private static final String API_KEY = "AIzaSyBG-KoePXLaB5HALyzSrIEPcjJYHcovpLM"; // Replace with your API key
     private static final String API_URL
             = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
 
     public static String getResponse(String userInput) {
         try {
-            String jsonInput = """
-            {
-              "contents": [{
-                "parts": [{"text": "%s"}]
-              }]
-            }
-            """.formatted(userInput);
+            JSONObject messagePart = new JSONObject();
+            messagePart.put("text", userInput);
+
+            JSONArray partsArray = new JSONArray();
+            partsArray.put(messagePart);
+
+            JSONObject content = new JSONObject();
+            content.put("parts", partsArray);
+
+            JSONArray contentsArray = new JSONArray();
+            contentsArray.put(content);
+
+            JSONObject payload = new JSONObject();
+            payload.put("contents", contentsArray);
+
+            String jsonInput = payload.toString();
 
             URL url = new URL(API_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -49,7 +58,6 @@ public class GeminiApi {
 
 //                System.out.println("Raw JSON Response:");
 //                System.out.println(response.toString());
-
                 if (responseCode >= 200 && responseCode < 300) {
                     return extractResponseText(response.toString());
                 } else {
