@@ -5,6 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalTime;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,14 +16,23 @@ public class DashboardPage {
 
     private JPanel chatPanel;
 
-    private int leftPanelWidth = 150;
+    private int leftPanelWidth = 200;
 
     private boolean proceedQuestions = false;
 
     private String placeholder = "What would you like to know? Ask a question...";
     private String question = null;
 
-    public DashboardPage() {
+    private StringBuilder conversationContext = new StringBuilder();
+
+    private Runnable runLoginPage;
+    private Runnable runEmailInputPage;
+
+    public DashboardPage(Runnable runLoginPage, Runnable runEmailInputPage) {
+
+        this.runLoginPage = runLoginPage;
+        this.runEmailInputPage = runEmailInputPage;
+
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width;
         int height = screenSize.height;
@@ -36,8 +46,99 @@ public class DashboardPage {
         bgPanel.requestFocusInWindow();
 
         JPanel leftPanel = new JPanel();
-        leftPanel.setPreferredSize(new Dimension(leftPanelWidth, 200));
+        leftPanel.setPreferredSize(new Dimension(leftPanelWidth, height));
         leftPanel.setBackground(new Color(32, 41, 56));
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setBorder(BorderFactory.createMatteBorder(
+                0, 0, 0, 1, new Color(255, 255, 255, 50))
+        );
+
+//      Top title panel
+        JPanel titlePanel = new JPanel();
+        titlePanel.setMaximumSize(new Dimension(leftPanelWidth, 60));
+        titlePanel.setBackground(new Color(32, 41, 56));
+        titlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        titlePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titlePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 20)); // left align + padding
+        titlePanel.setBorder(BorderFactory.createMatteBorder(
+                0, 0, 1, 0, new Color(255, 255, 255, 50))
+        );
+
+        JLabel appName1 = new JLabel("   AI");
+//        JLabel appName1 = new JLabel("AI");
+        appName1.setForeground(new Color(99, 102, 241));
+        appName1.setFont(new Font("Roboto", Font.BOLD, 16));
+
+        JLabel appName2 = new JLabel("Student");
+        appName2.setForeground(Color.WHITE);
+        appName2.setFont(new Font("Roboto", Font.BOLD, 16));
+
+        JLabel appName3 = new JLabel("Assistant");
+        appName3.setForeground(Color.WHITE);
+        appName3.setFont(new Font("Roboto", Font.BOLD, 16));
+
+        titlePanel.add(appName1, BorderLayout.WEST);
+        titlePanel.add(appName2, BorderLayout.WEST);
+        titlePanel.add(appName3, BorderLayout.WEST);
+        leftPanel.add(titlePanel);
+
+        JPanel leftInnerPanel = new JPanel();
+        leftInnerPanel.setBackground(new Color(32, 41, 56));
+        leftInnerPanel.setPreferredSize(new Dimension(leftPanelWidth - 50, 600));
+        leftInnerPanel.setLayout(new BoxLayout(leftInnerPanel, BoxLayout.Y_AXIS));
+        leftInnerPanel.setVisible(true);
+        leftInnerPanel.setOpaque(true);
+        leftPanel.add(leftInnerPanel, BorderLayout.CENTER);
+
+        JPanel menuItem1 = constructMenuItem("Clear Chat");
+        JPanel menuItem2 = constructMenuItem("Logout");
+        JPanel menuItem3 = constructMenuItem("Delete Account");
+
+        menuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(bgPanel);
+                new ClearChatDialog(topFrame, () -> {
+                    chatPanel.removeAll();
+                    chatPanel.revalidate();
+                    chatPanel.repaint();
+                    conversationContext.setLength(0);
+                    question = null;
+                }).setVisible(true);
+
+            }
+        });
+
+        menuItem2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (runLoginPage != null) {
+                    runLoginPage.run();
+                }
+            }
+        });
+
+        menuItem3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(bgPanel); // Make sure `bgPanel` is accessible here
+
+                DeleteAccountDialog dialog = new DeleteAccountDialog(topFrame, () -> {
+                    System.out.println("Deleting account for email: " + UserSession.loggedInEmail);
+                    UserDataHandler.deleteUser(UserSession.loggedInEmail);
+                    UserSession.invokedThroughDashboard = true;
+                    if (runEmailInputPage != null) {
+                        runEmailInputPage.run();
+                    }
+                });
+
+                dialog.setVisible(true);
+            }
+        });
+
+        leftInnerPanel.add(Box.createVerticalStrut(10));
+        leftInnerPanel.add(menuItem1);
+        leftInnerPanel.add(Box.createVerticalStrut(10));
+        leftInnerPanel.add(menuItem2);
+        leftInnerPanel.add(Box.createVerticalStrut(10));
+        leftInnerPanel.add(menuItem3);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setPreferredSize(new Dimension((width - leftPanelWidth), 200));
@@ -45,10 +146,7 @@ public class DashboardPage {
         rightPanel.setLayout(new BorderLayout());
 
         // Top bar (Right upper)
-        JPanel rightUpper = new JPanel();
-        rightUpper.setPreferredSize(new Dimension(width - 250, 60));
-        rightUpper.setBackground(new Color(32, 41, 56));
-        rightUpper.setLayout(new BorderLayout());
+        JPanel rightUpper = createGreetingBar();
 
         // Chat Input Panel (Bottom)
         JPanel chatInputPanel = new JPanel();
@@ -139,12 +237,29 @@ public class DashboardPage {
                 proceedQuestions = true;
 
             } else if (question != null) {
-                String response = GeminiApi.getResponse(question);
-//                System.out.println("Response = " + response);
-//                System.out.println("Question = " + question);
-                addBotMessage(response);
-                question = null;
-//                addUserMessage(question);
+
+                String current = question.trim();
+
+                if (!current.isEmpty()) {
+                    // Add the user's question to the context with labeling
+                    conversationContext.append("User: ").append(current).append("\n");
+
+                    // Build final prompt with all context
+                    String finalPrompt = "You are an AI assistant. Consider the following conversation history and answer the latest question accordingly:\n\n";
+                    finalPrompt += conversationContext.toString();
+                    finalPrompt += "AI: ";
+
+                    // Send to Gemini
+                    String response = GeminiApi.getResponse(finalPrompt);
+
+                    // Add bot response to context
+                    conversationContext.append("AI: ").append(response).append("\n");
+
+                    // Display
+                    addBotMessage(response);
+                    question = null;
+                }
+
             }
 
         });
@@ -155,7 +270,7 @@ public class DashboardPage {
         rightPanel.add(rightUpper, BorderLayout.NORTH);
 
         setupChatArea(rightPanel);
-        
+
         bgPanel.add(leftPanel, BorderLayout.WEST);
         bgPanel.add(rightPanel, BorderLayout.EAST);
         rightPanel.add(chatInputPanel, BorderLayout.SOUTH);
@@ -245,4 +360,96 @@ public class DashboardPage {
         });
     }
 
+    private JPanel createGreetingBar() {
+        JPanel greetingPanel = new JPanel();
+        greetingPanel.setLayout(new BorderLayout());
+        greetingPanel.setPreferredSize(new Dimension(bgPanel.getWidth(), 60));
+        greetingPanel.setBackground(new Color(32, 41, 56)); // Same as main background
+        greetingPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 50)), // bottom white border with transparency
+                BorderFactory.createEmptyBorder(0, 20, 0, 20) // inner padding
+        ));
+        
+        LocalTime now = LocalTime.now();
+        String greetingText;
+
+        if (now.isBefore(LocalTime.NOON)) {
+            greetingText = "Good morning, ";
+        } else if (now.isBefore(LocalTime.of(17, 0))) {
+            greetingText = "Good afternoon, ";
+        } else {
+            greetingText = "Good evening, ";
+        }
+
+        JLabel greetingLabel = new JLabel(greetingText);
+        greetingLabel.setForeground(new Color(255, 255, 255, 200));
+        greetingLabel.setFont(new Font("Roboto", Font.BOLD, 16));
+
+        JLabel userNameLabel = new JLabel("Farhan");
+        userNameLabel.setText(UserSession.loggedInUsername);
+        userNameLabel.setForeground(new Color(99, 102, 241));
+        userNameLabel.setFont(new Font("Roboto", Font.BOLD, 16));
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 20));
+        leftPanel.setOpaque(false);
+        leftPanel.add(greetingLabel);
+        leftPanel.add(userNameLabel);
+
+        // Right: Date
+        JLabel dateLabel = new JLabel(new java.text.SimpleDateFormat("EEEE, MMMM dd, yyyy").format(new Date()));
+        dateLabel.setForeground(new Color(255, 255, 255, 180));
+        dateLabel.setFont(new Font("Roboto", Font.PLAIN, 13));
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 20));
+        rightPanel.setOpaque(false);
+        rightPanel.add(dateLabel);
+
+        greetingPanel.add(leftPanel, BorderLayout.WEST);
+        greetingPanel.add(rightPanel, BorderLayout.EAST);
+
+        return greetingPanel;
+    }
+
+    public JPanel constructMenuItem(String label) {
+        JPanel menuItemPanel = new RoundedPanel(10);
+        menuItemPanel.setBackground(new Color(32, 41, 56));
+        menuItemPanel.setMaximumSize(new Dimension(leftPanelWidth - 20, 40));
+        menuItemPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        menuItemPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 10));
+
+        JLabel itemIcon = new JLabel();
+        itemIcon.setMaximumSize(new Dimension(40, 40));
+        itemIcon.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+        JLabel menuItem = new JLabel(label);
+        menuItem.setOpaque(false);
+        menuItem.setFont(new Font("Roboto", Font.BOLD, 14));
+        menuItem.setForeground(Color.WHITE);
+        menuItem.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 10));
+
+        // Hover effect
+        menuItemPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                menuItemPanel.setBackground(new Color(44, 55, 70));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                menuItemPanel.setBackground(new Color(32, 41, 56));
+            }
+        });
+
+        menuItemPanel.add(menuItem);
+
+        return menuItemPanel;
+    }
+
+    public void clearChat() {
+        chatPanel.removeAll();
+        chatPanel.revalidate();
+        chatPanel.repaint();
+        messageCount = 0;
+        conversationContext.setLength(0);
+    }
 }
