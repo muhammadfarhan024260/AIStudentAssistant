@@ -74,6 +74,28 @@ public class UserDataHandler {
         return false;
     }
 
+    public static String getUsernameByEmail(String email) {
+        List<User> users = readUsers();
+
+        for (User user : users) {
+            if (user.email.equals(email)) {
+                return user.username;
+            }
+        }
+        return null;
+    }
+
+    public static String getEmailByUsername(String username) {
+        List<User> users = readUsers();
+
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                return user.email;
+            }
+        }
+        return null;
+    }
+
     public static void changePass(String email, String password) {
         List<User> users = readUsers();
         boolean updated = false;
@@ -85,7 +107,7 @@ public class UserDataHandler {
                 break;
             }
         }
-        
+
         if (updated) {
             try {
                 ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME));
@@ -165,4 +187,31 @@ public class UserDataHandler {
             }
         }
     }
+
+    public static void deleteUser(String email) {
+        List<User> users = readUsers(); // Read existing users
+        boolean removed = false;
+
+        Iterator<User> iterator = users.iterator();
+        while (iterator.hasNext()) {
+            User user = iterator.next();
+            if (user.email.equals(email)) {
+                iterator.remove(); // Remove the matching user
+                removed = true;
+                break;
+            }
+        }
+
+        if (removed) {
+            try {
+                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME));
+                out.writeObject(users);
+                out.close();
+//            System.out.println("User deleted successfully.");
+            } catch (IOException e) {
+                System.out.println("Error while deleting user: " + e.getMessage());
+            }
+        }
+    }
+
 }
