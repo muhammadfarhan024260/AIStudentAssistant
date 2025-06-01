@@ -97,7 +97,7 @@ public class DashboardPage {
         menuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(bgPanel);
-                new ClearChatDialog(topFrame, () -> {
+                consClearChatDialog(topFrame, () -> {
                     chatPanel.removeAll();
                     chatPanel.revalidate();
                     chatPanel.repaint();
@@ -120,16 +120,14 @@ public class DashboardPage {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(bgPanel); // Make sure `bgPanel` is accessible here
 
-                DeleteAccountDialog dialog = new DeleteAccountDialog(topFrame, () -> {
+                consDeleteAccountDialog(topFrame, () -> {
                     System.out.println("Deleting account for email: " + UserSession.loggedInEmail);
                     UserDataHandler.deleteUser(UserSession.loggedInEmail);
                     UserSession.invokedThroughDashboard = true;
                     if (runEmailInputPage != null) {
                         runEmailInputPage.run();
                     }
-                });
-
-                dialog.setVisible(true);
+                }).setVisible(true);
             }
         });
 
@@ -451,5 +449,136 @@ public class DashboardPage {
         chatPanel.repaint();
         messageCount = 0;
         conversationContext.setLength(0);
+    }
+    
+    public JDialog consClearChatDialog(JFrame parent, Runnable onClearConfirmed) {
+        JDialog clearChatDialog = new JDialog(parent, "Clear Chat", true);
+        clearChatDialog.setUndecorated(true);
+        clearChatDialog.setSize(450, 160);
+        clearChatDialog.setLocationRelativeTo(parent);
+        clearChatDialog.setBackground(new Color(0, 0, 0, 0)); // transparent
+
+        // Rounded background panel
+        RoundedPanel bgPanel = new RoundedPanel(30);
+        bgPanel.setLayout(new BorderLayout());
+        bgPanel.setBackground(new Color(32, 41, 56));
+        bgPanel.setFocusable(true);
+
+        // Title
+        JLabel heading = new JLabel("Clear Chat");
+        heading.setFont(new Font("Roboto", Font.BOLD, 18));
+        heading.setForeground(Color.WHITE);
+        heading.setBorder(BorderFactory.createEmptyBorder(20, 20, 5, 20));
+
+        // Message
+        JLabel message = new JLabel("<html><body style='width: 350px;'>Are you sure you want to clear all chat messages? This cannot be undone.</body></html>");
+        message.setFont(new Font("Roboto", Font.PLAIN, 14));
+        message.setForeground(new Color(230, 230, 230));
+        message.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
+
+        // Content wrapper
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setOpaque(false);
+        content.add(heading);
+        content.add(message);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        buttonPanel.setOpaque(false);
+
+        JButton cancelButton = new RoundedButton("Cancel");
+        cancelButton.setBackground(new Color(64, 72, 90));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setFont(new Font("Roboto", Font.PLAIN, 13));
+        cancelButton.setPreferredSize(new Dimension(90, 35));
+        cancelButton.setBorder(new RoundedBorder(Color.WHITE, 20));
+        cancelButton.addActionListener(e -> clearChatDialog.dispose());
+
+        JButton clearButton = new RoundedButton("Clear");
+        clearButton.setBackground(new Color(99, 102, 241)); // Subtle orange
+        clearButton.setForeground(Color.WHITE);
+        clearButton.setFocusPainted(false);
+        clearButton.setFont(new Font("Roboto", Font.BOLD, 13));
+        clearButton.setPreferredSize(new Dimension(90, 35));
+        clearButton.addActionListener(e -> {
+            clearChatDialog.dispose();
+            if (onClearConfirmed != null) {
+                onClearConfirmed.run();
+            }
+        });
+
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(clearButton);
+
+        bgPanel.add(content, BorderLayout.CENTER);
+        bgPanel.add(buttonPanel, BorderLayout.SOUTH);
+        clearChatDialog.add(bgPanel, BorderLayout.CENTER);
+        
+        return clearChatDialog;
+    }
+    
+    public JDialog consDeleteAccountDialog(JFrame parent, Runnable onDeleteConfirmed) {
+        JDialog deleteAccountDialog = new JDialog(parent, "Delete Account", true);
+        deleteAccountDialog.setUndecorated(true);
+        deleteAccountDialog.setSize(480, 160);
+        deleteAccountDialog.setLocationRelativeTo(parent);
+        deleteAccountDialog.setBackground(new Color(0, 0, 0, 0)); // transparent
+
+        RoundedPanel bgPanel = new RoundedPanel(30);
+        bgPanel.setLayout(new BorderLayout());
+        bgPanel.setBackground(new Color(32, 41, 56));
+        bgPanel.setFocusable(true);
+
+        JLabel heading = new JLabel("Delete Account");
+        heading.setFont(new Font("Roboto", Font.BOLD, 18));
+        heading.setForeground(Color.WHITE);
+        heading.setBorder(BorderFactory.createEmptyBorder(20, 20, 5, 20));
+
+        JLabel message = new JLabel("<html><body style='width: 350px;'>Are you sure you want to permanently delete your account? This action cannot be undone.</body></html>");
+        message.setFont(new Font("Roboto", Font.PLAIN, 14));
+        message.setForeground(new Color(230, 230, 230));
+        message.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setOpaque(false);
+        content.add(heading);
+        content.add(message);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        buttonPanel.setOpaque(false);
+
+        JButton cancelButton = new RoundedButton("Cancel");
+        cancelButton.setBackground(new Color(64, 72, 90));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setFont(new Font("Roboto", Font.PLAIN, 13));
+        cancelButton.setPreferredSize(new Dimension(90, 35));
+        cancelButton.setBorder(new RoundedBorder(Color.WHITE, 20));
+        cancelButton.addActionListener(e -> deleteAccountDialog.dispose());
+
+        JButton deleteButton = new RoundedButton("Delete");
+        deleteButton.setBackground(new Color(220, 53, 69)); // Red
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        deleteButton.setFont(new Font("Roboto", Font.BOLD, 13));
+        deleteButton.setPreferredSize(new Dimension(90, 35));
+        deleteButton.addActionListener(e -> {
+            deleteAccountDialog.dispose();
+            if (onDeleteConfirmed != null) {
+                onDeleteConfirmed.run();
+            }
+        });
+
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(deleteButton);
+
+        bgPanel.add(content, BorderLayout.CENTER);
+        bgPanel.add(buttonPanel, BorderLayout.SOUTH);
+        deleteAccountDialog.add(bgPanel, BorderLayout.CENTER);
+        
+        return deleteAccountDialog;
     }
 }
