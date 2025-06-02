@@ -297,6 +297,7 @@ public class LoginPage {
         });
 
         signInButton.addActionListener(e -> {
+            String hashedPassword = UserDataHandler.hashPassword(passField.getText());
             if (emailField.getText().isEmpty() || emailField.getText().equals(placeholder)) {
                 emailValidLabel.setText("This field is mendatory");
                 emailField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
@@ -368,7 +369,7 @@ public class LoginPage {
                     canProceed[1] = false;
                 }
             } else if (isValidEmail(emailField.getText())) {
-                if (!(UserDataHandler.isPassCorrectByEmail(emailField.getText(), passField.getText()))) {
+                if (!(UserDataHandler.isPassCorrectByEmail(emailField.getText(), hashedPassword))) {
                     passValidLabel.setText("The password is incorrect");
                     passField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
                     passValidLabel.setVisible(true);
@@ -387,7 +388,7 @@ public class LoginPage {
                         canProceed[1] = true;
                     }
                 }
-            } else if (!(UserDataHandler.isPassCorrectByUser(emailField.getText(), passField.getText()))) {
+            } else if (!(UserDataHandler.isPassCorrectByUser(emailField.getText(), hashedPassword))) {
                 passValidLabel.setText("The password is incorrect");
                 passField.setBorder(new RoundedBorder(new Color(150, 0, 0), 10));
                 passValidLabel.setVisible(true);
