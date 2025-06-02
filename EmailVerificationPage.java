@@ -175,13 +175,18 @@ public class EmailVerificationPage {
                     emailValidLabel.setText("Correct OTP");
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
-                    OtpMatched = true;
+                    if (!OtpMatched) {
+                        OtpMatched = true;
+                    }
                 } else {
                     emailField.setBorder(new RoundedBorder(new Color(200, 0, 0), 10));
                     emailValidLabel.setForeground(new Color(200, 0, 0));
                     emailValidLabel.setText("Wrong OTP");
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
+                    if (OtpMatched) {
+                        OtpMatched = false;
+                    }
                 }
             }
         });
@@ -197,12 +202,18 @@ public class EmailVerificationPage {
                     emailValidLabel.setText("Correct OTP");
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
+                    if (!OtpMatched) {
+                        OtpMatched = true;
+                    }
                 } else {
                     emailField.setBorder(new RoundedBorder(new Color(200, 0, 0), 10));
                     emailValidLabel.setForeground(new Color(200, 0, 0));
                     emailValidLabel.setText("Wrong OTP");
                     emailValidLabel.setVisible(true);
                     emailSpacer.setVisible(true);
+                    if (OtpMatched) {
+                        OtpMatched = false;
+                    }
                 }
             }
         });
@@ -247,7 +258,7 @@ public class EmailVerificationPage {
 
         signInButton.addActionListener(e -> {
             if (OtpMatched) {
-                if (userNotAdded){
+                if (userNotAdded) {
                     UserDataHandler.addUser(SignupPage.getUser());
                     userNotAdded = false;
                 }
