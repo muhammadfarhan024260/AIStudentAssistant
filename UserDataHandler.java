@@ -3,10 +3,11 @@ package bukc.project;
 import java.io.*;
 import java.util.*;
 import static java.util.Collections.emptyList;
+import java.security.MessageDigest;
 
 public class UserDataHandler {
 
-    public static final String FILE_NAME = "users.ser";
+    private static final String FILE_NAME = "users.ser";
 
     public static List<User> readUsers() {
         List<User> users = new ArrayList();
@@ -211,6 +212,21 @@ public class UserDataHandler {
             } catch (IOException e) {
                 System.out.println("Error while deleting user: " + e.getMessage());
             }
+        }
+    }
+    
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes("UTF-8"));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));  // convert to hex
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Error hashing password", e);
         }
     }
 
