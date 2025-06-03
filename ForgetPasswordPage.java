@@ -965,7 +965,7 @@ public class ForgetPasswordPage {
             if (canProceedVar) {
 
                 String email = usernameField.getText();
-                String password = passField.getText();
+                String password = UserDataHandler.hashPassword(passField.getText());
 //                System.out.println("Passing email " + email + " and password " + password + " to database");
                 UserDataHandler.changePass(email, password);
 
