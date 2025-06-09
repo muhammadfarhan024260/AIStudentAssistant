@@ -739,7 +739,7 @@ public class SignupPage {
                 recieverEmail = emailField.getText();
                 String email = emailField.getText();
                 String username = usernameField.getText();
-                String password = passField.getText();
+                String password = UserDataHandler.hashPassword(passField.getText());
 
                 generatedOTP = EmailSender.generateOTP();
                 String subject = "Your Verification Code";
